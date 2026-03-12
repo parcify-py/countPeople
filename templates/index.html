@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#0f1419">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Fronta - Monitorování fronty</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle-container">
+        <button class="theme-toggle" id="themeToggle" aria-label="Přepnout motiv">
+            <span class="theme-icon">🌙</span>
+        </button>
+    </div>
+
+    <div class="app-wrapper">
+        <main class="app-main">
+            <!-- Svrchu - Čas a počet lidí -->
+            <div class="header-info">
+                <div class="info-block">
+                    <span class="info-label">Čekání</span>
+                    <span class="info-value" id="waitTime">-</span>
+                </div>
+                <div class="info-block">
+                    <span class="info-label">Fronta</span>
+                    <span class="info-value" id="peopleCount">0</span>
+                </div>
+            </div>
+
+            <!-- Videopřenos -->
+            <section class="video-section">
+                <div class="video-container">
+                    <img id="videoStream" src="/video_feed" alt="Video stream z kamery" class="video-feed">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
