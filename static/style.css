@@ -59,17 +59,10 @@ body {
 }
 
 /* ===== Theme Toggle ===== */
-.theme-toggle-container {
-    position: fixed;
-    top: 12px;
-    right: 12px;
-    z-index: 1000;
-}
-
 .theme-toggle {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     border: 2px solid var(--border-color);
     background: linear-gradient(135deg, var(--bg-secondary), var(--bg-secondary));
     color: var(--text-primary);
@@ -77,9 +70,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3em;
+    font-size: 1.1em;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -90,9 +83,9 @@ body {
 }
 
 .theme-toggle:hover {
-    transform: scale(1.08);
+    transform: scale(1.05);
     border-color: var(--accent-color);
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.2);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
 .theme-icon {
@@ -111,7 +104,7 @@ body {
     padding: 20px 12px;
     justify-content: center;
     flex-wrap: wrap;
-    align-items: stretch;
+    align-items: center;
     background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(79, 70, 229, 0.04) 100%);
     border-bottom: 1px solid var(--border-color);
     margin-top: 8px;
@@ -129,6 +122,7 @@ body {
     border-radius: 10px;
     flex: 1;
     min-width: 100px;
+    min-height: 60px;
     transition: all 0.3s ease;
 }
 
@@ -297,11 +291,6 @@ body {
     .video-container {
         border-radius: 10px;
     }
-
-    .theme-toggle {
-        width: 50px;
-        height: 50px;
-    }
 }
 
 @media (min-width: 640px) {
@@ -360,11 +349,6 @@ body {
 
     .video-container {
         border-radius: 12px;
-    }
-
-    .theme-toggle {
-        width: 52px;
-        height: 52px;
     }
 }
 
@@ -439,7 +423,7 @@ input, button, a {
 
 /* ===== Print ===== */
 @media print {
-    .theme-toggle-container {
+    .theme-toggle {
         display: none;
     }
 }

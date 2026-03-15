@@ -34,36 +34,31 @@ lock = threading.Lock()
 start_time = time.time()
 
 # Параметры
-DETECTION_INTERVAL = 1.0  # Детекция раз в 1 секунду
+DETECTION_INTERVAL = 0.3  # Детекция раз в 1.5 секунды
 TIME_PER_PERSON = 30  # 30 секунд на человека
 
+# Переменная для хранения текущего кадра для детекции
+current_frame_for_detection = None
 
-def generate_frames():
-    """Генератор кадров с видео"""
-    global people_count, wait_time, last_detection_time, detected_boxes, statistics
 
-    print("Открываю камеру...")
-    cap = cv2.VideoCapture("http://172.21.211.156:8080/video")
+def detection_loop():
+    """Отдельный поток для детекции людей (с задержкой 1-2 сек)"""
+    global people_count, wait_time, current_frame_for_detection, detected_boxes, statistics
 
-    if not cap.isOpened():
-        print("Ошибка: Камера не открылась")
-        return
-
-    fps_time = time.time()
-    fps_counter = 0
-    current_fps = 0
+    print("🤖 Поток детекции запущен...")
 
     while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+        try:
+            # Ждем перед следующей детекцией (1-2 сек)
+            time.sleep(DETECTION_INTERVAL)
 
-        frame = cv2.resize(frame, (800, 600))
+            # Если нет кадра, пропускаем
+            if current_frame_for_detection is None:
+                continue
 
-        # Проверяем время для новой детекции
-        current_time = time.time()
-        if current_time - last_detection_time >= DETECTION_INTERVAL:
-            results = model(frame)
+            # Выполняем детекцию на копии кадра
+            frame_copy = current_frame_for_detection.copy()
+            results = model(frame_copy)
 
             with lock:
                 people_count = 0
@@ -87,14 +82,43 @@ def generate_frames():
                         statistics["min_people"], people_count)
                 statistics["average_people"] = statistics["total_detections"] / \
                     max(1, statistics["detections_count"])
-                statistics["uptime"] = int(current_time - start_time)
+                statistics["uptime"] = int(time.time() - start_time)
 
                 # Время ожидания
                 wait_time = people_count * TIME_PER_PERSON
 
-            last_detection_time = current_time
+        except Exception as e:
+            print(f"Ошибка в потоке детекции: {e}")
 
-        # Рисуем боксы
+
+def generate_frames():
+    """Генератор кадров видео БЕЗ задержек (только передача)"""
+    global people_count, detected_boxes, current_frame_for_detection, statistics
+
+    print("🎥 Открываю камеру для видео потока...")
+    cap = cv2.VideoCapture("http://100.74.84.99:8080/video")
+
+    if not cap.isOpened():
+        print("❌ Ошибка: Камера не открылась")
+        return
+
+    fps_time = time.time()
+    fps_counter = 0
+    current_fps = 0
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            time.sleep(0.1)
+            continue
+
+        frame = cv2.resize(frame, (800, 600))
+
+        # Сохраняем кадр для потока детекции
+        with lock:
+            current_frame_for_detection = frame.copy()
+
+        # Рисуем боксы которые получили из потока детекции (они уже рассчитаны)
         with lock:
             for x1, y1, x2, y2 in detected_boxes:
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
@@ -110,14 +134,9 @@ def generate_frames():
             fps_counter = 0
             fps_time = time.time()
 
-        # Информация на кадре
-        with lock:
-            cv2.putText(frame, f"People: {people_count}", (20, 40),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
-            cv2.putText(frame, f"FPS: {current_fps:.1f}", (20, 80),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 200, 255), 2)
+        # Информация на кадре удалена (видео чистое)
 
-        # Кодируем в JPEG
+        # Кодируем в JPEG И ОТПРАВЛЯЕМ БЕЗ ЗАДЕРЖЕК
         ret, buffer = cv2.imencode('.jpg', frame)
         frame_bytes = buffer.tobytes()
 
@@ -166,5 +185,11 @@ def get_stats():
 
 
 if __name__ == '__main__':
-    # Запускаем в отдельном потоке
-    app.run(debug=False, host='127.0.0.1', port=5000, threaded=True)
+    # Запускаем поток детекции в фоне
+    detection_thread = threading.Thread(target=detection_loop, daemon=True)
+    detection_thread.start()
+    print("✅ Основной поток готов\n")
+
+    # Запускаем на всех интерфейсах для доступа из локальной сети и через портфорвардинг
+    # 0.0.0.0 = доступен с других ПК в локальной сети и через интернет (если портфорвардинг настроен)
+    app.run(debug=False, host='0.0.0.0', port=5000, threaded=True)

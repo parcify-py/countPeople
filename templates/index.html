@@ -10,16 +10,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Theme Toggle -->
-    <div class="theme-toggle-container">
-        <button class="theme-toggle" id="themeToggle" aria-label="Přepnout motiv">
-            <span class="theme-icon">🌙</span>
-        </button>
-    </div>
-
     <div class="app-wrapper">
         <main class="app-main">
-            <!-- Svrchu - Čas a počet lidí -->
+            <!-- Svrchu - Čas a počet lidí + Theme Toggle -->
             <div class="header-info">
                 <div class="info-block">
                     <span class="info-label">Čekání</span>
@@ -29,6 +22,9 @@
                     <span class="info-label">Fronta</span>
                     <span class="info-value" id="peopleCount">0</span>
                 </div>
+                <button class="theme-toggle" id="themeToggle" aria-label="Přepnout motiv">
+                    <span class="theme-icon">🌙</span>
+                </button>
             </div>
 
             <!-- Videopřenos -->
